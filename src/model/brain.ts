@@ -3,7 +3,7 @@ import { Inputs } from "@model/controller"
 import { Point } from "constants/types"
 
 export class Model {
-  private readonly EPSILON = 0.5
+  private readonly EPSILON = 0.2
 
   private brain: tf.Sequential
   private start_time: number
@@ -39,7 +39,7 @@ export class Model {
     const x = tf.tensor2d(intersections.flat(), [1, 16])
     const belief = ((this.brain.predict(x) as tf.Tensor).arraySync() as [Point])[0]
     belief[0] = Math.min(Math.max(-1, belief[0] + reward), 1)
-    belief[1] = Math.min(Math.max(-1, belief[1] - reward), 1)
+    belief[1] = Math.min(Math.max(-1, belief[1] + reward), 1)
 
     this.training = true
     const y = tf.tensor2d(belief, [1, 2])
