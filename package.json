@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "name": "bot-wheels",
+  "description": "Web-based autonomous racecar simulator powered by NEAT.",
+  "author": "Robbie Symonds <hello@robbiesymonds.me>",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "tsc && vite build",
+    "start": "vite preview",
+    "lint": "eslint ./src"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^3.20.0",
+    "stats.js": "^0.17.0"
+  },
+  "devDependencies": {
+    "@types/stats.js": "^0.17.0",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "@typescript-eslint/parser": "^5.40.0",
+    "eslint": "^8.25.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0",
+    "vite-tsconfig-paths": "^3.5.1"
+  },
+  "prettier": {
+    "semi": false,
+    "trailingComma": "none",
+    "printWidth": 120
+  }
+}
