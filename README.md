@@ -12,3 +12,5 @@ Then simply visit `https://localhost:3000` in your browser!
 
 1. The left checkbox controls the debug line rendering.
 2. The second checkbox enables manual vehicle control.
+
+![Cover](/public/assets/cover.png)
