@@ -34,9 +34,9 @@ export class Car {
   private width: number
   private height: number
   private position: Point
-  private state = INITIAL.state
   private sensors = INITIAL.sensors
 
+  state = INITIAL.state
   debug: boolean = true
   crashed: boolean = false
   ctx!: CanvasRenderingContext2D
@@ -88,7 +88,6 @@ export class Car {
    * Updates the car's dynamics given inputs.
    */
   update(inputs: Inputs): void {
-    console.log(inputs)
     const s = this.state
     const [w, h] = this.dimensions()
     const m = this.MAX_SENSOR_LENGTH * this.ctx.canvas.width
@@ -172,10 +171,15 @@ export class Car {
 
     // TODO: Update the car's skeleton line.
     const [x, y] = this.scale(vector)
-    this.skeleton = [
-      [x + w / 2, y],
-      [x + w / 2, y + h]
-    ]
+    const cx = x + w / 2
+    const cy = y + h / 4
+    this.skeleton = this.rotate(
+      [
+        [x + w / 2, y],
+        [x + w / 2, y + h]
+      ],
+      [cx, cy]
+    )
   }
 
   /*

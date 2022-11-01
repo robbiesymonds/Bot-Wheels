@@ -1,49 +1,47 @@
-import * as tf from "@tensorflow/tfjs"
 import { Inputs } from "@model/controller"
 import { Point } from "constants/types"
+import { DQNEnv, DQNOpt, DQNSolver } from "reinforce-js"
 
 export class Model {
-  private readonly EPSILON = 0.2
-
-  private brain: tf.Sequential
-  private start_time: number
-  private training: boolean = false
+  private brain: DQNSolver
 
   constructor() {
-    this.brain = tf.sequential()
-    this.brain.add(tf.layers.dense({ units: 4, inputShape: [16] }))
-    this.brain.add(tf.layers.dense({ units: 2, activation: "relu" }))
-    this.brain.compile({ loss: "meanSquaredError", optimizer: "adam" })
-    this.start_time = performance.now()
+    const opt = new DQNOpt()
+    opt.setEpsilon(0.01)
+    opt.setRewardClipping(false)
+    opt.setNumberOfHiddenUnits([16])
+    this.brain = new DQNSolver(new DQNEnv(100, 100, 16 + 5, 8), opt)
   }
 
-  predict(intersections: Point[]): Inputs {
-    const random = () => Math.floor(Math.random() * 2) - 1
-    if (Math.random() < this.EPSILON) {
-      console.log("Random!")
-      return { x: random(), y: random() }
-    } else {
-      console.log("Predict!")
-      return tf.tidy(() => {
-        const x = tf.tensor2d(intersections.flat(), [1, 16])
-        const y = tf.tidy(() => this.brain.predict(x) as tf.Tensor).arraySync() as [Point]
-        return { x: y[0][0], y: y[0][1] }
-      })
+  predict(intersections: Point[], meta: [number, number, number, number, number, number]): Inputs {
+    const r = (n: number) => parseFloat(n.toFixed(4))
+
+    const action = this.brain.decide([...intersections.flat().map(r), ...meta.map(r)])
+    switch (action) {
+      case 0:
+        return { x: 0, y: 0 }
+      case 1:
+        return { x: 0, y: 1 }
+      case 2:
+        return { x: 0, y: -1 }
+      case 3:
+        return { x: 1, y: 0 }
+      case 4:
+        return { x: 1, y: 1 }
+      case 5:
+        return { x: 1, y: -1 }
+      case 6:
+        return { x: -1, y: 0 }
+      case 7:
+        return { x: -1, y: 1 }
+      case 8:
+        return { x: -1, y: -1 }
+      default:
+        return { x: 0, y: 0 }
     }
   }
 
-  async train(intersections: Point[], reward: number) {
-    if (this.training) return
-
-    console.log("Reward: ", reward)
-    const x = tf.tensor2d(intersections.flat(), [1, 16])
-    const belief = ((this.brain.predict(x) as tf.Tensor).arraySync() as [Point])[0]
-    belief[0] = Math.min(Math.max(-1, belief[0] + reward), 1)
-    belief[1] = Math.min(Math.max(-1, belief[1] + reward), 1)
-
-    this.training = true
-    const y = tf.tensor2d(belief, [1, 2])
-    await this.brain.fit(x, y)
-    this.training = false
+  async train(reward: number) {
+    this.brain.learn(reward)
   }
 }

@@ -3,7 +3,7 @@ import { Track } from "@components/Track"
 import { Model } from "@model/brain"
 import { debounce } from "@utils/debounce"
 import { GATES_DATA, TRACK_DATA } from "constants/track"
-import { PlayerController } from "model/controller"
+import { Inputs, PlayerController } from "model/controller"
 import Stats from "stats.js"
 
 interface GameConstructor {
@@ -16,8 +16,10 @@ export class Game {
   private readonly ASPECT = 1 / 2
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
+  private death_timer: NodeJS.Timeout | null
   private player: PlayerController
   private timestamp: number
+  private control: boolean
   private stats: Stats
   private track: Track
   private model: Model
@@ -32,6 +34,8 @@ export class Game {
     // Assign variables.
     this.player = new PlayerController()
     this.model = new Model()
+    this.death_timer = null
+    this.control = false
     track.ctx = this.ctx
     car.ctx = this.ctx
     this.track = track
@@ -46,6 +50,7 @@ export class Game {
     this.stats.dom.classList.add("stats")
     document.body.appendChild(this.stats.dom)
     document.getElementById("debug")?.addEventListener("change", this.debug.bind(this))
+    document.getElementById("human")?.addEventListener("change", this.human.bind(this))
   }
 
   /*
@@ -55,6 +60,14 @@ export class Game {
     const debug = !(e.target as HTMLInputElement).checked
     this.track.debug = debug
     this.car.debug = debug
+  }
+
+  /*
+   * Updates the debug state of components.
+   */
+  private human(e: Event) {
+    const { checked } = e.target as HTMLInputElement
+    this.control = checked
   }
 
   /*
@@ -87,24 +100,51 @@ export class Game {
       // Clear the frame.
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
+      // Get current distance to nearest gate.
+      const { distance: g_dist, angle } = this.track.nearest(this.car.skeleton)
+
       // Update car inputs.
-      // const inputs = this.player.inputs
-      const inputs = this.model.predict(this.car.intersections)
+      let inputs: Inputs
+      if (this.control) {
+        inputs = this.player.inputs
+      } else {
+        inputs = this.model.predict(this.car.intersections, [
+          g_dist,
+          ...this.car.state.position,
+          this.car.state.velocity,
+          this.car.state.rotation,
+          angle
+        ])
+      }
+
+      // Update car state.
       this.car.update(inputs)
 
       // Check if car has crashed.
       this.car.intersects(track.walls)
       let reward = this.track.reward(car.skeleton)
-      // let reward = this.model.reward(gates)
 
       if (this.car.crashed) {
         this.car.reset()
-        reward = -1
+        this.track.reset()
+        reward = -99.0
       }
 
-      // The model learns from the given inputs and the new intersections and reward.
-      this.model.train(this.car.intersections, reward)
+      // Kill the car if appears stuck.
+      if (reward !== 0 && this.death_timer) {
+        clearTimeout(this.death_timer)
+      } else if (!this.death_timer) {
+        this.death_timer = setTimeout(() => {
+          this.car.reset()
+          this.track.reset()
+          reward = -1.0
+        }, 30 * 1000)
+      }
 
+      // Reward the model.
+      if (!this.control) this.model.train(reward)
+
+      // Redraw.
       this.track.render()
       this.car.render()
 

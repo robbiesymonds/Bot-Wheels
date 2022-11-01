@@ -12,17 +12,18 @@
     "lint": "eslint ./src"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^3.20.0",
+    "reinforce-js": "^1.5.1",
     "stats.js": "^0.17.0"
   },
   "devDependencies": {
+    "@types/node": "^18.11.2",
     "@types/stats.js": "^0.17.0",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
+    "vite-tsconfig-paths": "^3.5.1",
     "eslint": "^8.25.0",
     "typescript": "^4.6.4",
-    "vite": "^3.1.0",
-    "vite-tsconfig-paths": "^3.5.1"
+    "vite": "^3.1.0"
   },
   "prettier": {
     "semi": false,

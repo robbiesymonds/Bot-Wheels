@@ -1,3 +1,4 @@
+import { dist } from "@utils/distance"
 import { Line, Point } from "constants/types"
 
 interface TrackConstructor {
@@ -82,10 +83,30 @@ export class Track {
   }
 
   /*
+   * Returns the distance to the next reward gate.
+   */
+  nearest(car: Line): { distance: number; angle: number } {
+    let distance: number = 9999999
+    let angle: number = 0
+
+    this.gates.forEach((g) => {
+      const d = dist(car[0], g[0])
+      if (d < distance) {
+        distance = d
+
+        const mx = g[0][0] + 0.5 * (g[1][0] - g[0][0])
+        const my = g[0][1] + 0.5 * (g[1][1] - g[0][1])
+        angle = Math.atan2(car[0][1] - my, car[0][0] - mx)
+      }
+    })
+    return { distance, angle }
+  }
+
+  /*
    * Determines if the car has crossed through any gates and returns reward.
    */
   reward(car: Line): number {
-    let reward: number = 0
+    let reward: number = 0.1
 
     this.gates.forEach((g, i) => {
       const [[a, b], [c, d]] = car
@@ -96,7 +117,7 @@ export class Track {
       if (denominator === 0) return
 
       // The previous gate hasn't been crossed.
-      if (i > 0 && this.gate_progress[i - 1] === false) return
+      if ((i > 0 && this.gate_progress[i - 1] === false) || this.gate_progress[i] === true) return
 
       const ua = ((y - w) * (b - x) - (z - x) * (a - w)) / denominator
       const ub = ((c - a) * (b - x) - (d - b) * (a - w)) / denominator
@@ -104,8 +125,9 @@ export class Track {
       // Is the intersection along the segments?
       if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return
 
+      // Assign the rewards.
       this.gate_progress[i] = true
-      reward = 1
+      reward = (i + 1) * 10
     })
 
     return reward
