@@ -169,7 +169,6 @@ export class Car {
       }
     })
 
-    // TODO: Update the car's skeleton line.
     const [x, y] = this.scale(vector)
     const cx = x + w / 2
     const cy = y + h / 4
@@ -240,10 +239,6 @@ export class Car {
       c.fillRect(x, y, w, h)
     }
     c.restore()
-
-    c.moveTo(this.skeleton[0][0], this.skeleton[0][1])
-    c.lineTo(this.skeleton[1][0], this.skeleton[1][1])
-    c.stroke()
 
     // Optionally draw sensors.
     if (this.debug) {

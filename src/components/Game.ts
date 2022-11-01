@@ -57,9 +57,9 @@ export class Game {
    * Updates the debug state of components.
    */
   private debug(e: Event) {
-    const debug = !(e.target as HTMLInputElement).checked
-    this.track.debug = debug
-    this.car.debug = debug
+    const { checked } = e.target as HTMLInputElement
+    this.track.debug = checked
+    this.car.debug = checked
   }
 
   /*
