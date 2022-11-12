@@ -106,7 +106,7 @@ export class Track {
    * Determines if the car has crossed through any gates and returns reward.
    */
   reward(car: Line): number {
-    let reward: number = 0.1
+    let reward: number = -0.1
 
     this.gates.forEach((g, i) => {
       const [[a, b], [c, d]] = car
@@ -127,7 +127,7 @@ export class Track {
 
       // Assign the rewards.
       this.gate_progress[i] = true
-      reward = (i + 1) * 10
+      reward = 100.0 + 10 * i
     })
 
     return reward

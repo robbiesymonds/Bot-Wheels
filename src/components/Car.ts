@@ -214,7 +214,7 @@ export class Car {
 
     // Normalise.
     const { width, height } = this.ctx.canvas
-    this.intersections = intersections.map((i) => [i[0] / width, i[1] / height])
+    this.intersections = intersections.map((i) => [i[0] === 0 ? 999 : i[0] / width, i[1] === 0 ? 999 : i[1] / height])
   }
 
   /*

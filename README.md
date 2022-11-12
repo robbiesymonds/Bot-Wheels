@@ -1,6 +1,6 @@
 # Bot Wheels
 
-Web-based evolutionary computaiton racecar simulator powered by Andrej Karpathy's [`reinforce-js`](https://github.com/karpathy/reinforcejs) DQN agents.
+Web-based evolutionary computaiton racecar simulator to demonstrate another project of mine, [WASML](https://github.com/robbiesymonds/WASML)!
 
 ## 🚀 Demonstration
 Navigate into the project and run:

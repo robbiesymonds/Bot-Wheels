@@ -54,6 +54,13 @@ export class Game {
   }
 
   /*
+   * Intialises the learning model.
+   */
+  async init() {
+    await this.model.init()
+  }
+
+  /*
    * Updates the debug state of components.
    */
   private debug(e: Event) {
@@ -101,33 +108,27 @@ export class Game {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
       // Get current distance to nearest gate.
-      const { distance: g_dist, angle } = this.track.nearest(this.car.skeleton)
+      // const { distance: g_dist, angle } = this.track.nearest(this.car.skeleton)
 
       // Update car inputs.
       let inputs: Inputs
       if (this.control) {
         inputs = this.player.inputs
       } else {
-        inputs = this.model.predict(this.car.intersections, [
-          g_dist,
-          ...this.car.state.position,
-          this.car.state.velocity,
-          this.car.state.rotation,
-          angle
-        ])
+        inputs = this.model.predict(this.car.intersections, [this.car.state.velocity, this.car.state.rotation])
       }
 
       // Update car state.
       this.car.update(inputs)
 
       // Check if car has crashed.
-      this.car.intersects(track.walls)
-      let reward = this.track.reward(car.skeleton)
+      this.car.intersects(this.track.walls)
+      let reward = this.track.reward(this.car.skeleton)
 
       if (this.car.crashed) {
         this.car.reset()
         this.track.reset()
-        reward = -99.0
+        reward = -50.0
       }
 
       // Kill the car if appears stuck.
@@ -137,15 +138,17 @@ export class Game {
         this.death_timer = setTimeout(() => {
           this.car.reset()
           this.track.reset()
-          reward = -1.0
+          reward = -50.0
         }, 30 * 1000)
       }
 
       // Reward the model.
-      if (!this.control) this.model.train(reward)
+      // const { distance: g_dist_new, angle: angle_new } = this.track.nearest(this.car.skeleton)
+      if (!this.control)
+        this.model.train(reward, [...this.car.intersections.flat(), this.car.state.velocity, this.car.state.rotation])
 
       // Redraw.
-      this.track.render()
+      // this.track.render()
       this.car.render()
 
       this.timestamp = now - (delta % (1000 / this.FPS))
@@ -158,7 +161,12 @@ export class Game {
  * [!] Configure and initialise the game instance.
  */
 
-const car = new Car({ position: [0.07, 0.6], width: 0.01, height: 0.02 })
-const track = new Track({ walls: TRACK_DATA, gates: GATES_DATA })
-const game = new Game({ car, track })
-game.loop()
+const main = async () => {
+  const car = new Car({ position: [0.07, 0.6], width: 0.01, height: 0.02 })
+  const track = new Track({ walls: TRACK_DATA, gates: GATES_DATA })
+  const game = new Game({ car, track })
+  await game.init()
+  game.loop()
+}
+
+main()

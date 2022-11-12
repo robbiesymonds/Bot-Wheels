@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>Bot Wheels</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
 
-<head>
-  <title>Bot Wheels</title>
-  <link rel="stylesheet" href="style.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-
-<body>
-  <div>
-    <input id="debug" type="checkbox" checked="true" />
-    <input id="human" type="checkbox" />
-  </div>
-  <canvas id="game"></canvas>
-  <script type="module" src="src/components/Game">
-  </script>
-</body>
-
+  <body>
+    <div>
+      <button id="export">Export</button>
+      <input id="debug" type="checkbox" checked="true" />
+      <input id="human" type="checkbox" />
+    </div>
+    <canvas id="game"></canvas>
+    <script type="module" src="src/components/Game"></script>
+  </body>
 </html>
